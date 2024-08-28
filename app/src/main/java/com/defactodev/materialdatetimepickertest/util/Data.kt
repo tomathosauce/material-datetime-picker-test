@@ -1,17 +1,40 @@
 package com.defactodev.materialdatetimepickertest.util
 
+import android.util.Log
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
 
+fun format(date: Long): String{
+
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = date
+    }
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+    dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+    val formattedDate = dateFormat.format(calendar.time)
+
+    return formattedDate
+}
+
 fun getCalendar(year: Int, month: Int, day: Int): Calendar {
-    return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-        set(Calendar.YEAR, year)
-        set(Calendar.MONTH, month-1) // Note: Months are 0-based, so August is 7
-        set(Calendar.DAY_OF_MONTH, day)
-        set(Calendar.HOUR_OF_DAY, 0) // Optional: Set the hour
-        set(Calendar.MINUTE, 0) // Optional: Set the minute
-        set(Calendar.SECOND, 0) // Optional: Set the second
-        set(Calendar.MILLISECOND, 0)
+    //return Calendar.getInstance().apply {
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month-1) // Note: Months are 0-based, so August is 7
+            set(Calendar.DAY_OF_MONTH, day)
+            set(Calendar.HOUR_OF_DAY, 0) // Optional: Set the hour
+            set(Calendar.MINUTE, 0) // Optional: Set the minute
+            set(Calendar.SECOND, 0) // Optional: Set the second
+            set(Calendar.MILLISECOND, 0)
+
+    }
+}
+
+fun getCalendarFromLong(date: Long): Calendar {
+    return Calendar.getInstance().apply {
+        timeInMillis = date
     }
 }
 
@@ -49,6 +72,12 @@ class BinaryTree {
     }
 
     private fun findRecursive(current: Node?, value: Long): Node? {
+        if (current != null) {
+            /*if(true || format(current.value) == format(value) || format(current.value) == "2023-02-01"){
+                Log.d("isValid", "${format(current.value)},${format(value)} | ${current.value},$value")
+            }*/
+        }
+
         if (current == null || current.value == value) {
             return current
         }

@@ -6,10 +6,13 @@ import android.util.Log
 import com.google.android.material.datepicker.CalendarConstraints
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.TimeZone
 
 class RangeDateValidator: CalendarConstraints.DateValidator {
     private var days: Array<Long> = arrayOf<Long>()
     private var treeMap = hashMapOf<String, BinaryTree>()
+    private var listMap = hashMapOf<String, MutableList<Long>>()
+    private var list: List<Long> = listOf<Long>()
 
     constructor( days: Array<Long>){
         this@RangeDateValidator.days = days
@@ -19,23 +22,49 @@ class RangeDateValidator: CalendarConstraints.DateValidator {
         this@RangeDateValidator.treeMap = treeMap
     }
 
+    constructor( list: List<Long>){
+        this@RangeDateValidator.list = list
+    }
+/*
+    constructor( listMap: HashMap<String, MutableList<Long>>){
+        this@RangeDateValidator.listMap = listMap
+    }*/
+
     constructor(parcel: Parcel) : this(
         parcel.createLongArray()!!.toTypedArray()
     )
 
-    fun format(date: Long): String{
+    override fun isValid(date: Long): Boolean {
+        //return true
 
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = date
+        if(listMap.size > 0){
+            val daycal  = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                timeInMillis = date
+            }
+
+            val L = listMap[calendarToYearMonth(daycal)]
+
+            if(L != null){
+                for(day in L){
+                    Log.d("isValid", "${format(day)},${format(date)} | ${day},$date")
+                    if(day == date){
+                        return true
+                    }
+                }
+            }
+
+            return false
         }
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val formattedDate = dateFormat.format(calendar.time)
+        if(list.isNotEmpty()){
+            for(day in list){
+                if(day == date){
+                    return true
+                }
+            }
+            return false
+        }
 
-        return formattedDate
-    }
-
-    override fun isValid(date: Long): Boolean {
         if(treeMap.size > 0){
             val daycal  = Calendar.getInstance().apply {
                 timeInMillis = date
@@ -43,6 +72,8 @@ class RangeDateValidator: CalendarConstraints.DateValidator {
             val dayNode = treeMap[calendarToYearMonth(daycal)]?.find(date)
             if(dayNode !== null){
                 return true
+            } else {
+                Log.d("noHashMember", "${format(date)}-$date")
             }
         } else {
             for (day in days){

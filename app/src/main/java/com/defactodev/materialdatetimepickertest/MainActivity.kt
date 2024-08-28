@@ -140,10 +140,13 @@ class MainActivity : AppCompatActivity() {
         days.add(getCalendar(2023, 2, 1))
         days.add(getCalendar(2023, 2, 5))
 
+        var listMap = hashMapOf<String, MutableList<Long>>()
+
         btMostrar.setOnClickListener{
             val map = hashMapOf<String, BinaryTree>()
 
             for (day in days){
+                /*
                 val identifier = calendarToYearMonth(day)
 
                 if(!map.containsKey(identifier)) {
@@ -151,22 +154,46 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 map[identifier]?.add(day.timeInMillis)
+                 */
+
+                val identifier = calendarToYearMonth(day)
+
+                if(!listMap.containsKey(identifier)) {
+                    listMap[identifier] = mutableListOf<Long>()
+                }
+
+                listMap[identifier]?.add(day.timeInMillis)
+            }
+
+            var treeMap2 = hashMapOf<String, BinaryTree>()
+
+            for((index, value) in listMap){
+                treeMap2[index] = BinaryTree()
+                value.sort()
+                treeMap2[index]?.buildTree(value)
             }
 
             val longdates = days.map{it -> it.timeInMillis}
 
-            val maxdate = longdates.maxOrNull() ?: 0
-            val minDate = longdates.minOrNull() ?: 0
+            val maxdate = longdates.maxOrNull()
+            val minDate = longdates.minOrNull()
 
             //val dateValidator = RangeDateValidator(longdates.toTypedArray())
-            val dateValidator = RangeDateValidator(map)
+            //val dateValidator = RangeDateValidator(map)
+            val dateValidator = RangeDateValidator(treeMap2)
             val constraintsBuilderRange = CalendarConstraints.Builder().apply {
                 setFirstDayOfWeek(Calendar.MONDAY)
-                setStart(minDate)
-                setEnd(maxdate)
-                setOpenAt(maxdate)
+
                 setValidator(dateValidator)
             }
+
+            if(maxdate != null) {
+                constraintsBuilderRange.setEnd(maxdate)
+                constraintsBuilderRange.setOpenAt(maxdate)
+            }
+            if(minDate != null)
+                constraintsBuilderRange.setStart(minDate)
+
             val dp = MaterialDatePicker.Builder.datePicker()
                 /**.setSelection(date.timeInMillis)
                 .setCalendarConstraints(args.createCalendarConstraints())
